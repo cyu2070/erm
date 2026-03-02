@@ -1,39 +1,45 @@
 import React, { useEffect, useState } from 'react';
 
-const App = () => {
-  const [files, setFiles] = useState([]);
+function App() {
+    const [availableFiles, setAvailableFiles] = useState([]);
 
-  const handleFileChange = (event) => {
-    setFiles(event.target.files);
-  };
+    useEffect(() => {
+        fetchAvailableFiles();
+    }, []);
 
-  const uploadFiles = async () => {
-    const formData = new FormData();
-    for (const file of files) {
-      formData.append('files[]', file);
-    }
-    const response = await fetch('/upload', {  // Update '/upload' with your server endpoint
-      method: 'POST',
-      body: formData,
-    });
-    if (response.ok) {
-      console.log('Files uploaded successfully');
-    } else {
-      console.error('File upload failed');
-    }
-  };
+    const fetchAvailableFiles = async () => {
+        try {
+            const response = await fetch('/api/files');
+            const data = await response.json();
+            setAvailableFiles(data);
+        } catch (error) {
+            console.error('Error fetching files:', error);
+        }
+    };
 
-  useEffect(() => {
-    if (files.length > 0) {
-      uploadFiles();
-    }
-  }, [files]);
+    const handleServerFile = (fileName) => {
+        // Logic to load the file (e.g., open or download)
+    };
 
-  return (
-    <div>
-      <input type="file" multiple onChange={handleFileChange} />
-    </div>
-  );
-};
+    return (
+        <div>
+            <h1>Files from Uploads Folder</h1>
+            {availableFiles.length === 0 ? (
+                <p>Loading files...</p>
+            ) : (
+                <ul>
+                    {availableFiles.map(file => (
+                        <li key={file} onClick={() => handleServerFile(file)}>
+                            {file}
+                        </li>
+                    ))}
+                </ul>
+            )}
+
+            <h2>Manual File Upload</h2>
+            {/* Existing manual file upload section here */}
+        </div>
+    );
+}
 
 export default App;
